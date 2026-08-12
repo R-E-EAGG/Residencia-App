@@ -1,7 +1,7 @@
 import {
   collection, doc, onSnapshot, query, where, orderBy,
   setDoc, deleteDoc, getDoc, getDocs, runTransaction, arrayUnion, serverTimestamp,
-  addDoc, Timestamp,
+  addDoc, Timestamp, writeBatch,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -33,6 +33,57 @@ export async function addStudent(student) {
     telefonoTutor: student.telefonoTutor,
     telefonoTutorLocal: student.telefonoTutorLocal,
   });
+}
+
+// Edita un alumno ya cargado. Si cambia el DNI, migra tambien su asistencia y
+// su scoring (historial incluido) al nuevo DNI, para no perder nada.
+export async function editStudent(originalDni, student) {
+  const newDni = student.dni.trim();
+  const fields = {
+    nombreCompleto: student.nombreCompleto,
+    curso: student.curso,
+    pabellon: student.pabellon,
+    telefonoTutor: student.telefonoTutor,
+    telefonoTutorLocal: student.telefonoTutorLocal,
+  };
+
+  if (newDni === originalDni) {
+    await setDoc(doc(db, 'alumnos', originalDni), fields, { merge: true });
+    return;
+  }
+
+  const newRef = doc(db, 'alumnos', newDni);
+  const existing = await getDoc(newRef);
+  if (existing.exists()) {
+    throw new Error('Ya existe otro alumno cargado con ese DNI.');
+  }
+
+  const batch = writeBatch(db);
+  batch.set(newRef, fields);
+  batch.delete(doc(db, 'alumnos', originalDni));
+
+  // Migrar scoring (documento + historial).
+  const oldScoreRef = doc(db, 'scoring', originalDni);
+  const oldScoreSnap = await getDoc(oldScoreRef);
+  if (oldScoreSnap.exists()) {
+    batch.set(doc(db, 'scoring', newDni), { ...oldScoreSnap.data(), nombreCompleto: fields.nombreCompleto });
+    batch.delete(oldScoreRef);
+    const histSnap = await getDocs(collection(db, 'scoring', originalDni, 'historial'));
+    histSnap.docs.forEach((h) => {
+      batch.set(doc(db, 'scoring', newDni, 'historial', h.id), h.data());
+      batch.delete(h.ref);
+    });
+  }
+
+  // Migrar asistencia.
+  const asisSnap = await getDocs(query(collection(db, 'asistencia'), where('dni', '==', originalDni)));
+  asisSnap.docs.forEach((a) => {
+    const data = a.data();
+    batch.set(doc(db, 'asistencia', `${newDni}_${data.fecha}`), { ...data, dni: newDni });
+    batch.delete(a.ref);
+  });
+
+  await batch.commit();
 }
 
 // ---------- Asistencia ----------
