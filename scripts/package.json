@@ -1,0 +1,9 @@
+{
+  "name": "import-alumnos",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "csv-parse": "^5.5.6",
+    "firebase-admin": "^12.3.0"
+  }
+}
