@@ -88,7 +88,7 @@ export default function Login() {
     return (
       <div className="login-wrap">
         <form className="login-box" onSubmit={handlePinOnly}>
-          <h1>Residencia Estudiantil</h1>
+          <h1>Residencia Estudiantil - EAGG</h1>
           <p>Ingresa tu PIN de 4 digitos</p>
           <input
             type="password"
@@ -175,7 +175,7 @@ export default function Login() {
   return (
     <div className="login-wrap">
       <form className="login-box" onSubmit={handleLogin}>
-        <h1>Residencia Estudiantil</h1>
+        <h1>Residencia Estudiantil - EAGG</h1>
         <p>Entra con tu email y tu PIN</p>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Tu email" style={{ textAlign: 'left', letterSpacing: 0 }} />
         <input type="password" inputMode="numeric" maxLength={4} value={pin} onChange={(e) => setPin(digits(e.target.value))} placeholder="PIN" />

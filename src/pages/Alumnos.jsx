@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { listenStudents, addStudent, editStudent } from '../lib/data';
 
 const EMPTY = { dni: '', nombreCompleto: '', curso: '', pabellon: '', telefonoTutor: '', telefonoTutorLocal: '' };
@@ -79,9 +78,6 @@ export default function Alumnos() {
   return (
     <>
       <header className="app-header">
-        <Link className="back-link" to="/">
-          ← Inicio
-        </Link>
         <div className="top-row">
           <div>
             <h1>{editingDni ? 'Editar alumno' : 'Nuevo alumno'}</h1>

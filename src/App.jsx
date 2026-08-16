@@ -3,6 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { auth } from './firebase';
 import { PreceptorProvider } from './context/PreceptorContext';
+import BottomNav from './components/BottomNav';
 import Login from './pages/Login';
 import ResetPin from './pages/ResetPin';
 import Inicio from './pages/Inicio';
@@ -11,8 +12,6 @@ import Scoring from './pages/Scoring';
 import Alumnos from './pages/Alumnos';
 import Reporte from './pages/Reporte';
 
-// El link del mail "Olvide mi PIN" tiene que abrir siempre esta pantalla,
-// este o no logueado quien lo toca.
 function isResetLink() {
   return (window.location.hash || '').startsWith('#/reset');
 }
@@ -44,15 +43,20 @@ export default function App() {
   return (
     <PreceptorProvider user={user}>
       <HashRouter>
-        <Routes>
-          <Route path="/" element={<Inicio />} />
-          <Route path="/asistencia" element={<Asistencia />} />
-          <Route path="/scoring" element={<Scoring />} />
-          <Route path="/alumnos" element={<Alumnos />} />
-          <Route path="/reporte" element={<Reporte />} />
-          <Route path="/reset" element={<ResetPin />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <div className="app-shell">
+          <div className="app-shell-content">
+            <Routes>
+              <Route path="/" element={<Inicio />} />
+              <Route path="/asistencia" element={<Asistencia />} />
+              <Route path="/scoring" element={<Scoring />} />
+              <Route path="/alumnos" element={<Alumnos />} />
+              <Route path="/reporte" element={<Reporte />} />
+              <Route path="/reset" element={<ResetPin />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+          <BottomNav />
+        </div>
       </HashRouter>
     </PreceptorProvider>
   );

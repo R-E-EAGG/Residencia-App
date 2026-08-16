@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { listenStudents, listenScoring, listenScoringHistorial, addScoringEntry, SCORE_START } from '../lib/data';
 import { usePreceptor } from '../context/PreceptorContext';
 
@@ -57,6 +56,13 @@ export default function Scoring() {
   return (
     <>
       <Header filter={filter} search={search} setSearch={setSearch} />
+      <div className="pill-row">
+        {FILTERS.map((f) => (
+          <button key={f} className={`pill-btn${filter === f ? ' active' : ''}`} onClick={() => setFilter(f)}>
+            {f === 'Todos' ? 'Todos' : `Pab. ${f}`}
+          </button>
+        ))}
+      </div>
       <main className="app-main">
         <ul className="list">
           {visible.length === 0 && <li className="empty">Sin resultados</li>}
@@ -86,13 +92,6 @@ export default function Scoring() {
         </ul>
       </main>
 
-      <button
-        className="fab"
-        onClick={() => setFilter(FILTERS[(FILTERS.indexOf(filter) + 1) % FILTERS.length])}
-      >
-        ⚓ {filter === 'Todos' ? 'Todos' : 'Pab. ' + filter}
-      </button>
-
       {openStudent && (
         <ScoreModal
           student={openStudent}
@@ -107,9 +106,6 @@ export default function Scoring() {
 function Header({ filter, search, setSearch }) {
   return (
     <header className="app-header">
-      <Link className="back-link" to="/">
-        ← Inicio
-      </Link>
       <div className="top-row">
         <div>
           <h1>Scoring</h1>

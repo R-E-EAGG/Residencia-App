@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { listenStudents, getAttendanceForMonth } from '../lib/data';
 
 function pad(n) {
@@ -98,9 +97,6 @@ export default function Reporte() {
       `}</style>
 
       <header className="app-header no-print">
-        <Link className="back-link" to="/">
-          ← Inicio
-        </Link>
         <div className="top-row">
           <div>
             <h1>Reporte mensual</h1>

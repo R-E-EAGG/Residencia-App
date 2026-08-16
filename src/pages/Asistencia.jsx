@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { listenStudents, appendEvento, clearAttendanceDay, listenAttendanceForDate } from '../lib/data';
 import { todayStr, isWithinWindow, lastEventKind, eventosToText } from '../lib/dates';
 import { usePreceptor } from '../context/PreceptorContext';
@@ -14,7 +13,7 @@ export default function Asistencia() {
   const [filter, setFilter] = useState('Todos');
   const [pending, setPending] = useState({});
   const [infoStudent, setInfoStudent] = useState(null);
-  const [obsCtx, setObsCtx] = useState(null); // { student, kind }
+  const [obsCtx, setObsCtx] = useState(null);
   const [obsText, setObsText] = useState('');
 
   useEffect(() => {
@@ -112,6 +111,13 @@ export default function Asistencia() {
   return (
     <>
       <Header date={date} setDate={setDate} filter={filter} counts={counts} enabled={enabled} isToday={isToday} />
+      <div className="pill-row">
+        {FILTERS.map((f) => (
+          <button key={f} className={`pill-btn${filter === f ? ' active' : ''}`} onClick={() => setFilter(f)}>
+            {f === 'Todos' ? 'Todos' : `Pab. ${f}`}
+          </button>
+        ))}
+      </div>
       <main className="app-main">
         <ul className="list">
           {visible.map((s) => {
@@ -125,7 +131,6 @@ export default function Asistencia() {
                   <div className="row-name">{s.nombreCompleto}</div>
                   <div className="row-sub">
                     {s.curso} · Pab. {s.pabellon}
-                    {text ? '\n' + text : ''}
                   </div>
                 </button>
                 <div className="row-actions">
@@ -164,8 +169,6 @@ export default function Asistencia() {
           })}
         </ul>
       </main>
-
-      <FilterFab filter={filter} setFilter={setFilter} />
 
       {obsCtx && (
         <div className="modal-overlay">
@@ -221,13 +224,10 @@ export default function Asistencia() {
 function Header({ date, setDate, filter, counts, enabled, isToday }) {
   return (
     <header className="app-header">
-      <Link className="back-link" to="/">
-        ← Inicio
-      </Link>
       <div className="top-row">
         <div>
           <h1>Asistencia</h1>
-          <p className="subtitle">Residencia · {filter === 'Todos' ? 'Todos' : 'Pabellón ' + filter}</p>
+          <p className="subtitle">{filter === 'Todos' ? 'Todos' : 'Pabellón ' + filter}</p>
         </div>
         <div className="top-right">
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
@@ -259,16 +259,5 @@ function Header({ date, setDate, filter, counts, enabled, isToday }) {
       )}
       {isToday && !enabled && <div className="warning">Asistencia deshabilitada. Horario: 13:00 a 08:00 hs.</div>}
     </header>
-  );
-}
-
-function FilterFab({ filter, setFilter }) {
-  return (
-    <button
-      className="fab"
-      onClick={() => setFilter(FILTERS[(FILTERS.indexOf(filter) + 1) % FILTERS.length])}
-    >
-      ⚓ {filter === 'Todos' ? 'Todos' : 'Pab. ' + filter}
-    </button>
   );
 }

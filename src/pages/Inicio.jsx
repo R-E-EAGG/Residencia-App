@@ -7,47 +7,43 @@ export default function Inicio() {
   const { nombre } = usePreceptor();
 
   return (
-    <div className="home-wrap">
-      <div className="home-inner">
-        <h1>Residencia Estudiantil</h1>
-        <p className="sub">{nombre ? `Hola, ${nombre}` : 'Elegi que queres hacer'}</p>
+    <>
+      <div className="home-header">
+        <p className="home-eyebrow">{nombre ? `Hola, ${nombre}` : '\u00a0'}</p>
+        <h1 className="home-title">Residencia Estudiantil - EAGG</h1>
+      </div>
 
-        <Link className="home-card" to="/asistencia">
-          <div className="home-icon icon-asistencia">📋</div>
-          <div className="home-card-text">
-            <div className="home-card-title">Tomar Asistencia</div>
-            <div className="home-card-desc">Ausentes, retiros e ingresos del dia</div>
-          </div>
+      <div className="home-grid">
+        <Link className="home-tile accent" to="/asistencia">
+          <i className="ti ti-clipboard-check tile-icon" aria-hidden="true" />
+          <div className="home-tile-title">Asistencia</div>
+          <div className="home-tile-desc">Ausentes, retiros e ingresos</div>
         </Link>
 
-        <Link className="home-card" to="/scoring">
-          <div className="home-icon icon-scoring">⭐</div>
-          <div className="home-card-text">
-            <div className="home-card-title">Scoring</div>
-            <div className="home-card-desc">Puntaje y novedades de conducta</div>
-          </div>
+        <Link className="home-tile success" to="/scoring">
+          <i className="ti ti-star tile-icon" aria-hidden="true" />
+          <div className="home-tile-title">Scoring</div>
+          <div className="home-tile-desc">Puntaje y novedades</div>
         </Link>
 
-        <Link className="home-card" to="/alumnos">
-          <div className="home-icon icon-asistencia" style={{ background: '#0891b2' }}>➕</div>
-          <div className="home-card-text">
-            <div className="home-card-title">Nuevo alumno</div>
-            <div className="home-card-desc">Carga rapida al listado maestro</div>
-          </div>
+        <Link className="home-tile neutral" to="/alumnos">
+          <i className="ti ti-user-plus tile-icon" aria-hidden="true" />
+          <div className="home-tile-title">Alumnos</div>
+          <div className="home-tile-desc">Cargar o editar</div>
         </Link>
 
-        <Link className="home-card" to="/reporte">
-          <div className="home-icon icon-asistencia" style={{ background: '#7c3aed' }}>🖨️</div>
-          <div className="home-card-text">
-            <div className="home-card-title">Reporte mensual</div>
-            <div className="home-card-desc">Planilla y detalle, para imprimir o PDF</div>
-          </div>
+        <Link className="home-tile neutral" to="/reporte">
+          <i className="ti ti-printer tile-icon" aria-hidden="true" />
+          <div className="home-tile-title">Reporte</div>
+          <div className="home-tile-desc">Planilla mensual</div>
         </Link>
+      </div>
 
+      <div className="home-footer">
         <button className="home-logout" onClick={() => signOut(auth)}>
           Salir
         </button>
       </div>
-    </div>
+    </>
   );
 }
