@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { listenStudents, appendEvento, clearAttendanceDay, listenAttendanceForDate } from '../lib/data';
-import { todayStr, isWithinWindow, lastEventKind, eventosToText } from '../lib/dates';
+import { todayStr, isWithinWindow, lastEventKind, eventosToText, phoneDigits } from '../lib/dates';
 import { usePreceptor } from '../context/PreceptorContext';
 
 const FILTERS = ['Todos', 'A', 'B', 'C'];
@@ -205,9 +205,9 @@ export default function Asistencia() {
               <dt>Pabellón</dt>
               <dd>{infoStudent.pabellon}</dd>
               <dt>Tel. tutor</dt>
-              <dd>{infoStudent.telefonoTutor}</dd>
+              <dd><PhoneLink text={infoStudent.telefonoTutor} /></dd>
               <dt>Tel. tutor local</dt>
-              <dd>{infoStudent.telefonoTutorLocal}</dd>
+              <dd><PhoneLink text={infoStudent.telefonoTutorLocal} /></dd>
             </dl>
             <div className="modal-actions">
               <button className="btn btn-outline" onClick={() => setInfoStudent(null)}>
@@ -218,6 +218,24 @@ export default function Asistencia() {
         </div>
       )}
     </>
+  );
+}
+
+function PhoneLink({ text }) {
+  const digits = phoneDigits(text);
+  if (!digits) return <span style={{ color: '#b3adc6' }}>—</span>;
+  return (
+    <a
+      href={`tel:${digits}`}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--primary-bg)',
+        color: 'var(--primary-dark)', fontSize: 13, fontWeight: 600, padding: '5px 12px',
+        borderRadius: 20, textDecoration: 'none',
+      }}
+    >
+      <i className="ti ti-phone" style={{ fontSize: 14 }} aria-hidden="true" />
+      {text}
+    </a>
   );
 }
 

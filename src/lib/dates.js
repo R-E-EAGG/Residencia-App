@@ -28,3 +28,10 @@ export function eventosToText(eventos) {
     })
     .join('\n');
 }
+
+// Saca solo los digitos de lo que haya cargado el preceptor en el campo de
+// telefono (puede tener un nombre pegado, espacios, guiones, etc). Sirve para
+// armar el link "tel:" sin depender de que el campo este prolijo.
+export function phoneDigits(text) {
+  return (text || '').replace(/\D/g, '');
+}
