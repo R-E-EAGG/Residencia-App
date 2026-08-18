@@ -195,7 +195,7 @@ export default function Asistencia() {
 
       {infoStudent && (
         <div className="modal-overlay">
-          <div className="modal">
+          <div className="modal modal-lg">
             <h3>{infoStudent.nombreCompleto}</h3>
             <dl>
               <dt>DNI</dt>
@@ -228,12 +228,12 @@ function PhoneLink({ text }) {
     <a
       href={`tel:${digits}`}
       style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--primary-bg)',
-        color: 'var(--primary-dark)', fontSize: 13, fontWeight: 600, padding: '5px 12px',
-        borderRadius: 20, textDecoration: 'none',
+        display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--primary-bg)',
+        color: 'var(--primary-dark)', fontSize: 16, fontWeight: 600, padding: '8px 16px',
+        borderRadius: 24, textDecoration: 'none',
       }}
     >
-      <i className="ti ti-phone" style={{ fontSize: 14 }} aria-hidden="true" />
+      <i className="ti ti-phone" style={{ fontSize: 17 }} aria-hidden="true" />
       {text}
     </a>
   );
