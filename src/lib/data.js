@@ -1,5 +1,5 @@
 import {
-  collection, doc, onSnapshot, query, where, orderBy,
+  collection, collectionGroup, doc, onSnapshot, query, where, orderBy,
   setDoc, deleteDoc, getDoc, getDocs, runTransaction, arrayUnion, serverTimestamp,
   addDoc, Timestamp, writeBatch,
 } from 'firebase/firestore';
@@ -165,6 +165,28 @@ export function listenScoringHistorial(dni, onData, onError) {
     (snap) => onData(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
     onError
   );
+}
+
+// Trae todas las novedades de scoring de un mes ("YYYY-MM"), de todos los alumnos,
+// para el reporte imprimible. Requiere un indice de tipo "Collection group" sobre
+// el campo timestamp de la subcoleccion "historial" (Firestore lo pide solo la
+// primera vez y da un link para crearlo en un clic).
+export async function getScoringForMonth(monthKey) {
+  const [y, m] = monthKey.split('-').map(Number);
+  const start = new Date(y, m - 1, 1);
+  const end = new Date(y, m, 1);
+  const q = query(
+    collectionGroup(db, 'historial'),
+    where('timestamp', '>=', Timestamp.fromDate(start)),
+    where('timestamp', '<', Timestamp.fromDate(end)),
+    orderBy('timestamp', 'asc')
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({
+    id: d.id,
+    dni: d.ref.parent.parent.id,
+    ...d.data(),
+  }));
 }
 
 // category: 'ADVERTENCIA' | 'LEVE' | 'MODERADA' | 'GRAVE'
