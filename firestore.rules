@@ -1,11 +1,6 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Solo el personal logueado con el PIN compartido puede leer y escribir.
-    // Todo el que no inició sesión queda afuera, incluido cualquiera que
-    // encuentre la URL de la app o el projectId de Firebase.
     match /{document=**} {
       allow read, write: if request.auth != null;
     }

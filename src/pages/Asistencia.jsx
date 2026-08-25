@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { listenStudents, appendEvento, clearAttendanceDay, listenAttendanceForDate } from '../lib/data';
+import { listenStudents, appendEvento, clearAttendanceDay, listenAttendanceForDate, listenObservaciones, addObservacion } from '../lib/data';
 import { todayStr, isWithinWindow, lastEventKind, eventosToText, phoneDigits } from '../lib/dates';
 import { usePreceptor } from '../context/PreceptorContext';
 
@@ -194,30 +194,85 @@ export default function Asistencia() {
       )}
 
       {infoStudent && (
-        <div className="modal-overlay">
-          <div className="modal modal-lg">
-            <h3>{infoStudent.nombreCompleto}</h3>
-            <dl>
-              <dt>DNI</dt>
-              <dd>{infoStudent.dni}</dd>
-              <dt>Curso</dt>
-              <dd>{infoStudent.curso}</dd>
-              <dt>Pabellón</dt>
-              <dd>{infoStudent.pabellon}</dd>
-              <dt>Tel. tutor</dt>
-              <dd><PhoneLink text={infoStudent.telefonoTutor} /></dd>
-              <dt>Tel. tutor local</dt>
-              <dd><PhoneLink text={infoStudent.telefonoTutorLocal} /></dd>
-            </dl>
-            <div className="modal-actions">
-              <button className="btn btn-outline" onClick={() => setInfoStudent(null)}>
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <StudentInfoModal student={infoStudent} preceptor={preceptor} onClose={() => setInfoStudent(null)} />
       )}
     </>
+  );
+}
+
+function StudentInfoModal({ student, preceptor, onClose }) {
+  const [observaciones, setObservaciones] = useState(null);
+  const [nuevaObs, setNuevaObs] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(
+    () => listenObservaciones(student.dni, setObservaciones, (e) => alert('Error: ' + e.message)),
+    [student.dni]
+  );
+
+  async function handleAddObs() {
+    const texto = nuevaObs.trim();
+    if (!texto) return;
+    setSaving(true);
+    try {
+      await addObservacion(student.dni, texto, preceptor);
+      setNuevaObs('');
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal modal-lg">
+        <h3>{student.nombreCompleto}</h3>
+        <dl>
+          <dt>DNI</dt>
+          <dd>{student.dni}</dd>
+          <dt>Curso</dt>
+          <dd>{student.curso}</dd>
+          <dt>Pabellón</dt>
+          <dd>{student.pabellon}</dd>
+          <dt>Tel. tutor</dt>
+          <dd><PhoneLink text={student.telefonoTutor} /></dd>
+          <dt>Tel. tutor local</dt>
+          <dd><PhoneLink text={student.telefonoTutorLocal} /></dd>
+        </dl>
+
+        <div className="field-label">Observaciones</div>
+        <div className="hist-box">
+          {!observaciones ? (
+            <span className="hist-empty">Cargando...</span>
+          ) : observaciones.length === 0 ? (
+            <span className="hist-empty">Sin observaciones cargadas.</span>
+          ) : (
+            observaciones
+              .map((o) => {
+                const fecha = o.timestamp?.toDate ? o.timestamp.toDate().toLocaleString('es-AR') : '';
+                const quien = o.preceptor ? ` · ${o.preceptor}` : '';
+                return `${fecha}${quien}: ${o.texto}`;
+              })
+              .join('\n')
+          )}
+        </div>
+
+        <div className="field-label" style={{ marginTop: 14 }}>
+          Agregar observación
+        </div>
+        <textarea rows={3} value={nuevaObs} onChange={(e) => setNuevaObs(e.target.value)} placeholder="Escribí una observación..." />
+
+        <div className="modal-actions">
+          <button className="btn btn-outline" onClick={onClose}>
+            Cerrar
+          </button>
+          <button className="btn btn-primary" disabled={!nuevaObs.trim() || saving} onClick={handleAddObs}>
+            {saving ? 'Guardando...' : 'Guardar observación'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

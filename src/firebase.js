@@ -2,9 +2,6 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Estos valores salen de: Firebase Console → Configuración del proyecto → Tus apps → Config del SDK.
-// En Netlify se cargan como variables de entorno (ver README). En local, poné un archivo .env
-// en la raíz del proyecto con estos mismos nombres (VITE_FIREBASE_...).
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -17,4 +14,3 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-

@@ -76,13 +76,13 @@ h1, h2, h3 { color: var(--heading); font-weight: 600; }
 .home-tile.neutral { background: #fff; color: var(--heading); border-color: var(--border); }
 .home-footer { text-align: center; padding: 24px 16px; }
 
-/* ---- Header común (pantallas internas) ---- */
+/* ---- Header comun (pantallas internas) ---- */
 header.app-header { padding: 16px 14px 10px; max-width: 720px; margin: 0 auto; }
 .top-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
 .top-row h1 { font-size: 17px; margin: 0; font-weight: 600; }
 .subtitle { font-size: 11.5px; color: #9891ac; margin: 2px 0 0; }
 .top-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-input[type=date] { border: 1px solid var(--border); border-radius: 10px; padding: 7px 9px; font-size: 13px; background: #fff; }
+input[type=date], input[type=month] { border: 1px solid var(--border); border-radius: 10px; padding: 7px 9px; font-size: 13px; background: #fff; }
 input[type=search] { flex: 1; border: 1px solid var(--border); border-radius: 12px; padding: 9px 12px; font-size: 13px; background: #fff; }
 .search-row { display: flex; gap: 6px; margin-bottom: 10px; }
 
@@ -179,3 +179,17 @@ dl dt { color: #9891ac; }
 .cat-btn.sel-GRAVE { background: var(--red-bg); border-color: var(--red); color: var(--red-text); }
 .hist-box { background: var(--muted-bg); border-radius: 10px; padding: 11px; font-size: 12.5px; color: #4a4560; white-space: pre-line; max-height: 150px; overflow-y: auto; margin-top: 5px; }
 .hist-empty { color: #b3adc6; font-style: italic; }
+
+/* ---- Reporte (tablas imprimibles) ---- */
+.rep-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+.rep-table th, .rep-table td { border: 1px solid #e2e8f0; padding: 3px 4px; text-align: center; }
+.rep-table td.name { text-align: left; white-space: nowrap; }
+.rep-table th.name { text-align: left; }
+.code-A { background: #fee2e2; color: #991b1b; font-weight: 700; }
+.code-R { background: #ffedd5; color: #9a3412; font-weight: 700; }
+.code-I { background: #dcfce7; color: #166534; font-weight: 700; }
+@media print {
+  .no-print { display: none !important; }
+  .app-main { padding: 0 !important; max-width: none !important; }
+  body { background: #fff !important; }
+}

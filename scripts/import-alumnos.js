@@ -1,8 +1,8 @@
 // Uso:
-//   1. En Google Sheets: Archivo → Descargar → Valores separados por comas (.csv), de la hoja "Asistencia".
-//   2. Guardá ese archivo como alumnos.csv en esta misma carpeta (scripts/).
-//   3. Descargá una clave de cuenta de servicio: Firebase Console → Configuración del proyecto →
-//      Cuentas de servicio → Generar nueva clave privada. Guardala como scripts/service-account.json.
+//   1. En Google Sheets: Archivo -> Descargar -> Valores separados por comas (.csv), de la hoja "Asistencia".
+//   2. Guarda ese archivo como alumnos.csv en esta misma carpeta (scripts/).
+//   3. Descarga una clave de cuenta de servicio: Firebase Console -> Configuracion del proyecto ->
+//      Cuentas de servicio -> Generar nueva clave privada. Guardala como scripts/service-account.json.
 //   4. Desde la carpeta scripts/: npm install firebase-admin csv-parse
 //   5. node import-alumnos.js
 //
@@ -22,7 +22,7 @@ const csvText = readFileSync(new URL('./alumnos.csv', import.meta.url), 'utf8');
 const rows = parse(csvText, { skip_empty_lines: true });
 
 async function run() {
-  const dataRows = rows[0][0] === 'DNI' ? rows.slice(1) : rows; // saltea encabezado si existe
+  const dataRows = rows[0][0] === 'DNI' ? rows.slice(1) : rows;
   let count = 0;
   for (const row of dataRows) {
     const [dni, nombreCompleto, curso, pabellon, telefonoTutor, telefonoTutorLocal] = row.map((c) =>

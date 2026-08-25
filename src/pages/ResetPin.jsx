@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { checkResetCode, confirmNewPin, rememberEmail } from '../lib/auth';
 
 function getOobCode() {
-  // El link de Firebase agrega los parametros despues del signo "?", que puede
-  // quedar antes o despues del "#" segun el navegador. Buscamos en los dos lugares.
   const fromSearch = new URLSearchParams(window.location.search);
   if (fromSearch.get('oobCode')) return fromSearch.get('oobCode');
 
@@ -17,7 +15,7 @@ function getOobCode() {
 }
 
 export default function ResetPin() {
-  const [status, setStatus] = useState('checking'); // checking | ready | invalid | done
+  const [status, setStatus] = useState('checking');
   const [email, setEmail] = useState('');
   const [pin, setPin] = useState('');
   const [pin2, setPin2] = useState('');

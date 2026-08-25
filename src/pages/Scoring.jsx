@@ -109,7 +109,7 @@ function Header({ filter, search, setSearch }) {
       <div className="top-row">
         <div>
           <h1>Scoring</h1>
-          <p className="subtitle">Residencia · {filter === 'Todos' ? 'Todos' : 'Pabellón ' + filter}</p>
+          <p className="subtitle">{filter === 'Todos' ? 'Todos' : 'Pabellón ' + filter}</p>
         </div>
       </div>
       <div className="search-row">

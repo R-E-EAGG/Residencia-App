@@ -7,7 +7,6 @@ export function todayStr() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-// Ventana horaria en la que se puede cargar asistencia del día actual: 13:00 a 08:00.
 export function isWithinWindow() {
   const h = new Date().getHours();
   return h >= 13 || h < 8;
@@ -29,9 +28,6 @@ export function eventosToText(eventos) {
     .join('\n');
 }
 
-// Saca solo los digitos de lo que haya cargado el preceptor en el campo de
-// telefono (puede tener un nombre pegado, espacios, guiones, etc). Sirve para
-// armar el link "tel:" sin depender de que el campo este prolijo.
 export function phoneDigits(text) {
   return (text || '').replace(/\D/g, '');
 }

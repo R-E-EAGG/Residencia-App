@@ -21,7 +21,7 @@ function kindLetter(tipo) {
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
 export default function Reporte() {
-  const [view, setView] = useState('mensual'); // 'mensual' | 'individual'
+  const [view, setView] = useState('mensual');
   const [students, setStudents] = useState(null);
   const [month, setMonth] = useState(currentMonthKey());
   const [pabellon, setPabellon] = useState('Todos');
@@ -114,21 +114,6 @@ export default function Reporte() {
 
   return (
     <>
-      <style>{`
-        @media print {
-          .no-print { display: none !important; }
-          .app-main { padding: 0 !important; max-width: none !important; }
-          body { background: #fff !important; }
-        }
-        .rep-table { width: 100%; border-collapse: collapse; font-size: 10px; }
-        .rep-table th, .rep-table td { border: 1px solid #e2e8f0; padding: 3px 4px; text-align: center; }
-        .rep-table td.name { text-align: left; white-space: nowrap; }
-        .rep-table th.name { text-align: left; }
-        .code-A { background: #fee2e2; color: #991b1b; font-weight: 700; }
-        .code-R { background: #ffedd5; color: #9a3412; font-weight: 700; }
-        .code-I { background: #dcfce7; color: #166534; font-weight: 700; }
-      `}</style>
-
       <header className="app-header no-print">
         <div className="top-row">
           <div>
@@ -150,14 +135,13 @@ export default function Reporte() {
         <ReporteIndividual students={students} />
       ) : (
         <ReporteMensual
-          students={students}
           month={month}
           setMonth={setMonth}
           pabellon={pabellon}
           setPabellon={setPabellon}
           loading={loading}
+          students={students}
           visible={visible}
-          nDays={nDays}
           dayNums={dayNums}
           tituloMes={tituloMes}
           attendance={attendance}
@@ -169,7 +153,7 @@ export default function Reporte() {
   );
 }
 
-function ReporteMensual({ students, month, setMonth, pabellon, setPabellon, loading, visible, nDays, dayNums, tituloMes, attendance, detalle, detalleScoring }) {
+function ReporteMensual({ month, setMonth, pabellon, setPabellon, loading, students, visible, dayNums, tituloMes, attendance, detalle, detalleScoring }) {
   return (
     <>
       <div className="app-header no-print" style={{ paddingTop: 0 }}>

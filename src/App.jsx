@@ -11,6 +11,7 @@ import Asistencia from './pages/Asistencia';
 import Scoring from './pages/Scoring';
 import Alumnos from './pages/Alumnos';
 import Reporte from './pages/Reporte';
+import Contactos from './pages/Contactos';
 
 function isResetLink() {
   return (window.location.hash || '').startsWith('#/reset');
@@ -51,6 +52,7 @@ export default function App() {
               <Route path="/scoring" element={<Scoring />} />
               <Route path="/alumnos" element={<Alumnos />} />
               <Route path="/reporte" element={<Reporte />} />
+              <Route path="/contactos" element={<Contactos />} />
               <Route path="/reset" element={<ResetPin />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

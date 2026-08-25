@@ -37,6 +37,12 @@ export default function Inicio() {
           <div className="home-tile-title">Reporte</div>
           <div className="home-tile-desc">Planilla mensual</div>
         </Link>
+
+        <Link className="home-tile neutral" to="/contactos" style={{ gridColumn: '1 / -1' }}>
+          <i className="ti ti-phone-call tile-icon" aria-hidden="true" />
+          <div className="home-tile-title">Contactos</div>
+          <div className="home-tile-desc">Teléfonos útiles y de emergencia</div>
+        </Link>
       </div>
 
       <div className="home-footer">

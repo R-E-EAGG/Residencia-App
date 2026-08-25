@@ -18,8 +18,6 @@ export function listenStudents(onData, onError) {
   );
 }
 
-// Alta rápida de un alumno nuevo desde el formulario de la app.
-// dni es el ID del documento (igual que en la hoja "Asistencia" original).
 export async function addStudent(student) {
   const ref = doc(db, 'alumnos', student.dni);
   const existing = await getDoc(ref);
@@ -35,8 +33,6 @@ export async function addStudent(student) {
   });
 }
 
-// Edita un alumno ya cargado. Si cambia el DNI, migra tambien su asistencia y
-// su scoring (historial incluido) al nuevo DNI, para no perder nada.
 export async function editStudent(originalDni, student) {
   const newDni = student.dni.trim();
   const fields = {
@@ -62,7 +58,6 @@ export async function editStudent(originalDni, student) {
   batch.set(newRef, fields);
   batch.delete(doc(db, 'alumnos', originalDni));
 
-  // Migrar scoring (documento + historial).
   const oldScoreRef = doc(db, 'scoring', originalDni);
   const oldScoreSnap = await getDoc(oldScoreRef);
   if (oldScoreSnap.exists()) {
@@ -75,7 +70,12 @@ export async function editStudent(originalDni, student) {
     });
   }
 
-  // Migrar asistencia.
+  const obsSnap = await getDocs(collection(db, 'alumnos', originalDni, 'observaciones'));
+  obsSnap.docs.forEach((o) => {
+    batch.set(doc(db, 'alumnos', newDni, 'observaciones', o.id), o.data());
+    batch.delete(o.ref);
+  });
+
   const asisSnap = await getDocs(query(collection(db, 'asistencia'), where('dni', '==', originalDni)));
   asisSnap.docs.forEach((a) => {
     const data = a.data();
@@ -86,8 +86,51 @@ export async function editStudent(originalDni, student) {
   await batch.commit();
 }
 
+// ---------- Observaciones de un alumno ----------
+// Historial, no se pisan: alumnos/{dni}/observaciones/{autoId}
+
+export function listenObservaciones(dni, onData, onError) {
+  const q = query(collection(db, 'alumnos', dni, 'observaciones'), orderBy('timestamp', 'desc'));
+  return onSnapshot(
+    q,
+    (snap) => onData(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    onError
+  );
+}
+
+export async function addObservacion(dni, texto, preceptor) {
+  await addDoc(collection(db, 'alumnos', dni, 'observaciones'), {
+    texto,
+    preceptor: preceptor || '',
+    timestamp: serverTimestamp(),
+  });
+}
+
+// ---------- Contactos / telefonos utiles ----------
+
+export function listenContacts(onData, onError) {
+  const q = query(collection(db, 'contactos'), orderBy('nombre', 'asc'));
+  return onSnapshot(
+    q,
+    (snap) => onData(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    onError
+  );
+}
+
+export async function addContact(nombre, telefono) {
+  await addDoc(collection(db, 'contactos'), { nombre, telefono });
+}
+
+export async function editContact(id, nombre, telefono) {
+  await setDoc(doc(db, 'contactos', id), { nombre, telefono }, { merge: true });
+}
+
+export async function deleteContact(id) {
+  await deleteDoc(doc(db, 'contactos', id));
+}
+
 // ---------- Asistencia ----------
-// Un documento por alumno+día: asistencia/{dni}_{fecha}
+// Un documento por alumno+dia: asistencia/{dni}_{fecha}
 // fecha en formato "YYYY-MM-DD". eventos: [{ tipo, detalle, hora, preceptor, timestamp }]
 
 function attendanceDocId(dni, fecha) {
@@ -110,8 +153,6 @@ export function listenAttendanceForDate(fecha, onData, onError) {
   );
 }
 
-// Trae toda la asistencia de un mes ("YYYY-MM") para armar la planilla/reporte.
-// Devuelve { [dni]: { [dia]: { eventos: [...] } } }
 export async function getAttendanceForMonth(monthKey) {
   const start = `${monthKey}-01`;
   const end = `${monthKey}-31`;
@@ -167,10 +208,6 @@ export function listenScoringHistorial(dni, onData, onError) {
   );
 }
 
-// Trae todas las novedades de scoring de un mes ("YYYY-MM"), de todos los alumnos,
-// para el reporte imprimible. Requiere un indice de tipo "Collection group" sobre
-// el campo timestamp de la subcoleccion "historial" (Firestore lo pide solo la
-// primera vez y da un link para crearlo en un clic).
 export async function getScoringForMonth(monthKey) {
   const [y, m] = monthKey.split('-').map(Number);
   const start = new Date(y, m - 1, 1);
@@ -189,8 +226,6 @@ export async function getScoringForMonth(monthKey) {
   }));
 }
 
-// category: 'ADVERTENCIA' | 'LEVE' | 'MODERADA' | 'GRAVE'
-// points: puntos a restar (se ignora y se fuerza a 0 si category es ADVERTENCIA)
 export async function addScoringEntry(dni, nombreCompleto, category, points, description, preceptor) {
   const pts = category === 'ADVERTENCIA' ? 0 : Math.max(0, Number(points) || 0);
   const scoreRef = doc(db, 'scoring', dni);

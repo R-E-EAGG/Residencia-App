@@ -6,7 +6,7 @@ const EMPTY = { dni: '', nombreCompleto: '', curso: '', pabellon: '', telefonoTu
 export default function Alumnos() {
   const [students, setStudents] = useState(null);
   const [form, setForm] = useState(EMPTY);
-  const [editingDni, setEditingDni] = useState(null); // null = alta nueva, si no = DNI original que se esta editando
+  const [editingDni, setEditingDni] = useState(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
   const [search, setSearch] = useState('');

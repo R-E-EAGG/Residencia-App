@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { getRememberedEmail, forgetEmail, registerPreceptor, loginWithPin, requestPinReset } from '../lib/auth';
 
-// modos: 'pin' (celular ya reconocido, solo PIN) | 'login' (celular nuevo, email+PIN)
-// | 'register' (primera vez) | 'forgot' (pedir mail de recuperacion) | 'forgot-sent'
 export default function Login() {
   const remembered = getRememberedEmail();
   const [mode, setMode] = useState(remembered ? 'pin' : 'login');
@@ -171,7 +169,6 @@ export default function Login() {
     );
   }
 
-  // mode === 'login'
   return (
     <div className="login-wrap">
       <form className="login-box" onSubmit={handleLogin}>
