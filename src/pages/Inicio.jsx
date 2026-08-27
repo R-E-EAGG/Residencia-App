@@ -15,31 +15,41 @@ export default function Inicio() {
 
       <div className="home-grid">
         <Link className="home-tile accent" to="/asistencia">
-          <i className="ti ti-clipboard-check tile-icon" aria-hidden="true" />
+          <div className="home-tile-icon-wrap">
+            <i className="ti ti-clipboard-check tile-icon" aria-hidden="true" />
+          </div>
           <div className="home-tile-title">Asistencia</div>
           <div className="home-tile-desc">Ausentes, retiros e ingresos</div>
         </Link>
 
         <Link className="home-tile success" to="/scoring">
-          <i className="ti ti-star tile-icon" aria-hidden="true" />
+          <div className="home-tile-icon-wrap">
+            <i className="ti ti-star tile-icon" aria-hidden="true" />
+          </div>
           <div className="home-tile-title">Scoring</div>
           <div className="home-tile-desc">Puntaje y novedades</div>
         </Link>
 
         <Link className="home-tile neutral" to="/alumnos">
-          <i className="ti ti-user-plus tile-icon" aria-hidden="true" />
+          <div className="home-tile-icon-wrap">
+            <i className="ti ti-user-plus tile-icon" aria-hidden="true" />
+          </div>
           <div className="home-tile-title">Alumnos</div>
           <div className="home-tile-desc">Cargar o editar</div>
         </Link>
 
         <Link className="home-tile neutral" to="/reporte">
-          <i className="ti ti-printer tile-icon" aria-hidden="true" />
+          <div className="home-tile-icon-wrap">
+            <i className="ti ti-printer tile-icon" aria-hidden="true" />
+          </div>
           <div className="home-tile-title">Reporte</div>
           <div className="home-tile-desc">Planilla mensual</div>
         </Link>
 
         <Link className="home-tile neutral" to="/contactos" style={{ gridColumn: '1 / -1' }}>
-          <i className="ti ti-phone-call tile-icon" aria-hidden="true" />
+          <div className="home-tile-icon-wrap">
+            <i className="ti ti-phone-call tile-icon" aria-hidden="true" />
+          </div>
           <div className="home-tile-title">Contactos</div>
           <div className="home-tile-desc">Teléfonos útiles y de emergencia</div>
         </Link>
