@@ -104,7 +104,7 @@ export default function Reporte() {
         return {
           alumno: dniToName[r.dni]?.nombre || r.dni,
           fecha: fechaObj ? fechaObj.toLocaleDateString('es-AR') : '',
-          hora: fechaObj ? fechaObj.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '',
+          hora: fechaObj ? fechaObj.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }) : '',
           categoria: r.categoria,
           puntos: r.puntos,
           descripcion: r.descripcion,

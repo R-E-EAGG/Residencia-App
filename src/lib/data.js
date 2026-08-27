@@ -174,7 +174,7 @@ export async function getAttendanceForMonth(monthKey) {
 
 export async function appendEvento(dni, fecha, tipo, detalle, preceptor) {
   const ref = doc(db, 'asistencia', attendanceDocId(dni, fecha));
-  const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
   const snap = await getDoc(ref);
   const nuevoEvento = { tipo, detalle: detalle || '', hora, preceptor: preceptor || '', timestamp: Timestamp.now() };
   if (snap.exists()) {
