@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { listenStudents, appendEvento, clearAttendanceDay, listenAttendanceForDate, listenObservaciones, addObservacion } from '../lib/data';
-import { todayStr, isWithinWindow, lastEventKind, eventosToText, phoneDigits } from '../lib/dates';
+import { todayStr, isWithinWindow, lastEventKind, eventosToText, phoneDigits, fmtDateTime } from '../lib/dates';
 import { usePreceptor } from '../context/PreceptorContext';
 
 const FILTERS = ['Todos', 'A', 'B', 'C'];
@@ -250,7 +250,7 @@ function StudentInfoModal({ student, preceptor, onClose }) {
           ) : (
             observaciones
               .map((o) => {
-                const fecha = o.timestamp?.toDate ? o.timestamp.toDate().toLocaleString('es-AR') : '';
+                const fecha = o.timestamp?.toDate ? fmtDateTime(o.timestamp.toDate()) : '';
                 const quien = o.preceptor ? ` · ${o.preceptor}` : '';
                 return `${fecha}${quien}: ${o.texto}`;
               })

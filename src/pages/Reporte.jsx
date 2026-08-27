@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { listenStudents, getAttendanceForMonth, getScoringForMonth, listenScoringHistorial, listenScoring, SCORE_START } from '../lib/data';
+import { fmtDateTime } from '../lib/dates';
 
 function pad(n) {
   return n < 10 ? '0' + n : '' + n;
@@ -263,9 +264,9 @@ function ReporteMensual({ month, setMonth, pabellon, setPabellon, loading, stude
                   {detalleScoring.map((r, i) => (
                     <tr key={i}>
                       <td className="name">{r.alumno}</td>
-                      <td>{r.fecha}</td>
-                      <td>{r.hora}</td>
-                      <td>{r.categoria}</td>
+                      <td style={{ fontWeight: 700 }}>{r.fecha}</td>
+                      <td style={{ fontWeight: 700 }}>{r.hora}</td>
+                      <td style={{ fontWeight: 700 }}>{r.categoria}</td>
                       <td>{r.puntos > 0 ? `-${r.puntos}` : '0'}</td>
                       <td className="name">{r.descripcion}</td>
                       <td className="name">{r.preceptor}</td>
@@ -366,11 +367,11 @@ function ReporteIndividual({ students }) {
                 </thead>
                 <tbody>
                   {historial.map((h) => {
-                    const fecha = h.timestamp?.toDate ? h.timestamp.toDate().toLocaleString('es-AR') : '';
+                    const fecha = h.timestamp?.toDate ? fmtDateTime(h.timestamp.toDate()) : '';
                     return (
                       <tr key={h.id}>
-                        <td>{fecha}</td>
-                        <td>{h.categoria}</td>
+                        <td style={{ fontWeight: 700 }}>{fecha}</td>
+                        <td style={{ fontWeight: 700 }}>{h.categoria}</td>
                         <td>{h.puntos > 0 ? `-${h.puntos}` : '0'}</td>
                         <td className="name">{h.descripcion}</td>
                         <td className="name">{h.preceptor}</td>

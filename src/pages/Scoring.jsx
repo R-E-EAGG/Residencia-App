@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { listenStudents, listenScoring, listenScoringHistorial, addScoringEntry, SCORE_START } from '../lib/data';
+import { fmtDateTime } from '../lib/dates';
 import { usePreceptor } from '../context/PreceptorContext';
 
 const FILTERS = ['Todos', 'A', 'B', 'C'];
@@ -160,14 +161,19 @@ function ScoreModal({ student, info, onClose }) {
           ) : historial.length === 0 ? (
             <span className="hist-empty">Sin novedades registradas.</span>
           ) : (
-            historial
-              .map((h) => {
-                const fecha = h.timestamp?.toDate ? h.timestamp.toDate().toLocaleString('es-AR') : '';
-                const quien = h.preceptor ? ` · ${h.preceptor}` : '';
-                const line = `${fecha} ${h.categoria}${h.descripcion ? ': ' + h.descripcion : ''}${quien}`;
-                return line + (h.puntos > 0 ? ` (-${h.puntos} pts)` : ' (0 pts)');
-              })
-              .join('\n')
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {historial.map((h) => {
+                const fecha = h.timestamp?.toDate ? fmtDateTime(h.timestamp.toDate()) : '';
+                return (
+                  <div key={h.id}>
+                    <strong>{fecha} · {h.categoria}</strong>
+                    {h.puntos > 0 ? ` (-${h.puntos} pts)` : ' (0 pts)'}
+                    {h.descripcion ? `: ${h.descripcion}` : ''}
+                    {h.preceptor ? ` · ${h.preceptor}` : ''}
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
 

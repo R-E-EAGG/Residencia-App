@@ -31,3 +31,27 @@ export function eventosToText(eventos) {
 export function phoneDigits(text) {
   return (text || '').replace(/\D/g, '');
 }
+
+// Formatea fecha + hora sin segundos (dd/mm/aaaa hh:mm). toLocaleString('es-AR')
+// sin opciones incluye segundos por defecto, por eso este helper centraliza el formato.
+export function fmtDateTime(date) {
+  if (!date) return '';
+  return date.toLocaleString('es-AR', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+}
+
+// Formateadores de fecha/hora SIN segundos, para usar en toda la app
+// (evita que toLocaleString muestre "14:35:10" en vez de "14:35").
+export function formatDate(date) {
+  if (!date) return '';
+  return date.toLocaleDateString('es-AR');
+}
+export function formatTime(date) {
+  if (!date) return '';
+  return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+}
+export function formatDateTime(date) {
+  if (!date) return '';
+  return `${formatDate(date)} ${formatTime(date)}`;
+}
