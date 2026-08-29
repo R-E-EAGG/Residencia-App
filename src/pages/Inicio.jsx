@@ -3,6 +3,12 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { usePreceptor } from '../context/PreceptorContext';
 
+function todayLong() {
+  const d = new Date();
+  const str = d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 export default function Inicio() {
   const { nombre } = usePreceptor();
 
@@ -11,6 +17,7 @@ export default function Inicio() {
       <div className="home-header">
         <p className="home-eyebrow">{nombre ? `Hola, ${nombre}` : '\u00a0'}</p>
         <h1 className="home-title">Residencia Estudiantil - EAGG</h1>
+        <p className="home-date">{todayLong()}</p>
       </div>
 
       <div className="home-grid">
