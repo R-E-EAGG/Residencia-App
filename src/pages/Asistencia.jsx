@@ -15,6 +15,7 @@ export default function Asistencia() {
   const [infoStudent, setInfoStudent] = useState(null);
   const [obsCtx, setObsCtx] = useState(null);
   const [obsText, setObsText] = useState('');
+  const [listKind, setListKind] = useState(null); // 'P' | 'AUSENTE' | 'RETIRO' | 'REGRESO'
 
   useEffect(() => {
     const unsub = listenStudents(setStudents, (err) => alert('Error: ' + err.message));
@@ -51,6 +52,19 @@ export default function Asistencia() {
     });
     c.P = Math.max(0, visible.length - c.A - c.R);
     return c;
+  }, [visible, attendance]);
+
+  const listsByKind = useMemo(() => {
+    const lists = { P: [], AUSENTE: [], RETIRO: [], REGRESO: [] };
+    if (!attendance) return lists;
+    visible.forEach((s) => {
+      const kind = lastEventKind(attendance[s.dni]?.eventos);
+      if (kind === 'AUSENTE') lists.AUSENTE.push(s);
+      else if (kind === 'RETIRO') lists.RETIRO.push(s);
+      else if (kind === 'REGRESO') lists.REGRESO.push(s);
+      else lists.P.push(s);
+    });
+    return lists;
   }, [visible, attendance]);
 
   function setPendingFor(dni, val) {
@@ -110,13 +124,11 @@ export default function Asistencia() {
 
   return (
     <>
-      <Header date={date} setDate={setDate} filter={filter} counts={counts} enabled={enabled} isToday={isToday} />
+      <Header date={date} setDate={setDate} filter={filter} counts={counts} enabled={enabled} isToday={isToday} onOpenList={setListKind} />
       <div className="pill-row">
-        {FILTERS.map((f) => (
-          <button key={f} className={`pill-btn${filter === f ? ' active' : ''}`} onClick={() => setFilter(f)}>
-            {f === 'Todos' ? 'Todos' : `Pab. ${f}`}
-          </button>
-        ))}
+        <button className="pill-btn active" onClick={() => setFilter(FILTERS[(FILTERS.indexOf(filter) + 1) % FILTERS.length])}>
+          {filter === 'Todos' ? 'Todos' : `Pab. ${filter}`}
+        </button>
       </div>
       <main className="app-main">
         <ul className="list">
@@ -196,9 +208,47 @@ export default function Asistencia() {
       {infoStudent && (
         <StudentInfoModal student={infoStudent} preceptor={preceptor} onClose={() => setInfoStudent(null)} />
       )}
+
+      {listKind && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>{KIND_LABELS[listKind]}</h3>
+            <p className="hint">{listsByKind[listKind].length} alumno(s)</p>
+            {listsByKind[listKind].length === 0 ? (
+              <p className="hist-empty" style={{ padding: '8px 0' }}>Sin alumnos en esta lista.</p>
+            ) : (
+              <ul className="list">
+                {listsByKind[listKind]
+                  .slice()
+                  .sort((a, b) => a.nombreCompleto.localeCompare(b.nombreCompleto, 'es'))
+                  .map((s) => (
+                    <li key={s.dni} className="row">
+                      <div className="row-info" style={{ cursor: 'default' }}>
+                        <div className="row-name">{s.nombreCompleto}</div>
+                        <div className="row-sub">Pab. {s.pabellon}</div>
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            )}
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={() => setListKind(null)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
+
+const KIND_LABELS = {
+  P: 'Presentes',
+  AUSENTE: 'Ausentes',
+  RETIRO: 'Retiros',
+  REGRESO: 'Ingresos',
+};
 
 function StudentInfoModal({ student, preceptor, onClose }) {
   const [observaciones, setObservaciones] = useState(null);
@@ -294,7 +344,7 @@ function PhoneLink({ text }) {
   );
 }
 
-function Header({ date, setDate, filter, counts, enabled, isToday }) {
+function Header({ date, setDate, filter, counts, enabled, isToday, onOpenList }) {
   return (
     <header className="app-header">
       <div className="top-row">
@@ -312,22 +362,22 @@ function Header({ date, setDate, filter, counts, enabled, isToday }) {
       </div>
       {counts && (
         <div className="counts">
-          <div className="counter c-p">
+          <button className="counter c-p" onClick={() => onOpenList('P')}>
             <div className="val">{counts.P}</div>
             <div className="lbl">Pres.</div>
-          </div>
-          <div className="counter c-a">
+          </button>
+          <button className="counter c-a" onClick={() => onOpenList('AUSENTE')}>
             <div className="val">{counts.A}</div>
             <div className="lbl">Aus.</div>
-          </div>
-          <div className="counter c-r">
+          </button>
+          <button className="counter c-r" onClick={() => onOpenList('RETIRO')}>
             <div className="val">{counts.R}</div>
             <div className="lbl">Retir.</div>
-          </div>
-          <div className="counter c-i">
+          </button>
+          <button className="counter c-i" onClick={() => onOpenList('REGRESO')}>
             <div className="val">{counts.I}</div>
             <div className="lbl">Ingr.</div>
-          </div>
+          </button>
         </div>
       )}
       {isToday && !enabled && <div className="warning">Asistencia deshabilitada. Horario: 13:00 a 08:00 hs.</div>}

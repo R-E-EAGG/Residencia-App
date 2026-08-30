@@ -111,7 +111,12 @@ input[type=search] { flex: 1; border: 1px solid var(--border); border-radius: 12
 .save-status .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
 .counts { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 10px; }
-.counter { border-radius: 12px; padding: 6px 4px; text-align: center; }
+.counter {
+  border-radius: 12px; padding: 6px 4px; text-align: center; border: none; cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0,0,0,.08); transition: transform .08s ease, box-shadow .08s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.counter:active { transform: translateY(3px); box-shadow: 0 0 0 rgba(0,0,0,.08); }
 .counter .val { font-size: 15px; font-weight: 600; line-height: 1.1; }
 .counter .lbl { font-size: 9px; text-transform: uppercase; opacity: .8; letter-spacing: .03em; }
 .c-p { background: var(--muted-bg); color: var(--muted-text); }

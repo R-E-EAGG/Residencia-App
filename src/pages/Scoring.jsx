@@ -58,11 +58,9 @@ export default function Scoring() {
     <>
       <Header filter={filter} search={search} setSearch={setSearch} />
       <div className="pill-row">
-        {FILTERS.map((f) => (
-          <button key={f} className={`pill-btn${filter === f ? ' active' : ''}`} onClick={() => setFilter(f)}>
-            {f === 'Todos' ? 'Todos' : `Pab. ${f}`}
-          </button>
-        ))}
+        <button className="pill-btn active" onClick={() => setFilter(FILTERS[(FILTERS.indexOf(filter) + 1) % FILTERS.length])}>
+          {filter === 'Todos' ? 'Todos' : `Pab. ${filter}`}
+        </button>
       </div>
       <main className="app-main">
         <ul className="list">
