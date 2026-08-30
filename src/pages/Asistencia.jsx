@@ -125,11 +125,9 @@ export default function Asistencia() {
   return (
     <>
       <Header date={date} setDate={setDate} filter={filter} counts={counts} enabled={enabled} isToday={isToday} onOpenList={setListKind} />
-      <div className="pill-row">
-        <button className="pill-btn active" onClick={() => setFilter(FILTERS[(FILTERS.indexOf(filter) + 1) % FILTERS.length])}>
-          {filter === 'Todos' ? 'Todos' : `Pab. ${filter}`}
-        </button>
-      </div>
+      <button className="fab" onClick={() => setFilter(FILTERS[(FILTERS.indexOf(filter) + 1) % FILTERS.length])}>
+        {filter === 'Todos' ? 'Todos' : `Pab. ${filter}`}
+      </button>
       <main className="app-main">
         <ul className="list">
           {visible.map((s) => {

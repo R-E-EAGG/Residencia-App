@@ -57,11 +57,9 @@ export default function Scoring() {
   return (
     <>
       <Header filter={filter} search={search} setSearch={setSearch} />
-      <div className="pill-row">
-        <button className="pill-btn active" onClick={() => setFilter(FILTERS[(FILTERS.indexOf(filter) + 1) % FILTERS.length])}>
-          {filter === 'Todos' ? 'Todos' : `Pab. ${filter}`}
-        </button>
-      </div>
+      <button className="fab" onClick={() => setFilter(FILTERS[(FILTERS.indexOf(filter) + 1) % FILTERS.length])}>
+        {filter === 'Todos' ? 'Todos' : `Pab. ${filter}`}
+      </button>
       <main className="app-main">
         <ul className="list">
           {visible.length === 0 && <li className="empty">Sin resultados</li>}

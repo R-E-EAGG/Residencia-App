@@ -226,6 +226,25 @@ export async function getScoringForMonth(monthKey) {
   }));
 }
 
+// Escucha en vivo las novedades de scoring cargadas HOY (cualquier alumno), para
+// el aviso pulsante en la portada de Inicio.
+export function listenScoringToday(onData, onError) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const q = query(
+    collectionGroup(db, 'historial'),
+    where('timestamp', '>=', Timestamp.fromDate(start)),
+    where('timestamp', '<', Timestamp.fromDate(end)),
+    orderBy('timestamp', 'asc')
+  );
+  return onSnapshot(
+    q,
+    (snap) => onData(snap.docs.map((d) => ({ id: d.id, dni: d.ref.parent.parent.id, ...d.data() }))),
+    onError
+  );
+}
+
 export async function addScoringEntry(dni, nombreCompleto, category, points, description, preceptor) {
   const pts = category === 'ADVERTENCIA' ? 0 : Math.max(0, Number(points) || 0);
   const scoreRef = doc(db, 'scoring', dni);

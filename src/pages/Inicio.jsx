@@ -1,7 +1,10 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { usePreceptor } from '../context/PreceptorContext';
+import { listenStudents, listenScoringToday } from '../lib/data';
+import { fmtDateTime } from '../lib/dates';
 
 function todayLong() {
   const d = new Date();
@@ -11,6 +14,42 @@ function todayLong() {
 
 export default function Inicio() {
   const { nombre } = usePreceptor();
+  const navigate = useNavigate();
+  const [students, setStudents] = useState(null);
+  const [novedades, setNovedades] = useState([]);
+  const [novedadIndex, setNovedadIndex] = useState(0);
+  const [showNovedades, setShowNovedades] = useState(false);
+
+  useEffect(() => listenStudents(setStudents, () => {}), []);
+  useEffect(() => listenScoringToday(setNovedades, () => {}), []);
+
+  const dniToStudent = useMemo(() => {
+    const map = {};
+    (students || []).forEach((s) => (map[s.dni] = s));
+    return map;
+  }, [students]);
+
+  const hasNovedad = novedades.length > 0;
+
+  function openScoring(e) {
+    if (hasNovedad) {
+      e.preventDefault();
+      setNovedadIndex(0);
+      setShowNovedades(true);
+    }
+  }
+
+  function closeNovedades() {
+    setShowNovedades(false);
+  }
+
+  function goToScoring() {
+    setShowNovedades(false);
+    navigate('/scoring');
+  }
+
+  const actual = novedades[novedadIndex];
+  const actualStudent = actual ? dniToStudent[actual.dni] : null;
 
   return (
     <>
@@ -29,12 +68,14 @@ export default function Inicio() {
           <div className="home-tile-desc">Ausentes, retiros e ingresos</div>
         </Link>
 
-        <Link className="home-tile success" to="/scoring">
+        <Link className={`home-tile success${hasNovedad ? ' has-novedad' : ''}`} to="/scoring" onClick={openScoring}>
           <div className="home-tile-icon-wrap">
             <i className="ti ti-star tile-icon" aria-hidden="true" />
           </div>
           <div className="home-tile-title">Scoring</div>
-          <div className="home-tile-desc">Puntaje y novedades</div>
+          <div className="home-tile-desc">
+            {hasNovedad ? `${novedades.length} novedad(es) hoy` : 'Puntaje y novedades'}
+          </div>
         </Link>
 
         <Link className="home-tile neutral" to="/alumnos">
@@ -67,6 +108,44 @@ export default function Inicio() {
           Salir
         </button>
       </div>
+
+      {showNovedades && actual && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Novedad de scoring {novedades.length > 1 ? `(${novedadIndex + 1} de ${novedades.length})` : ''}</h3>
+            <p className="modal-score">
+              {actualStudent ? actualStudent.nombreCompleto : actual.dni}
+              {actualStudent ? ` · ${actualStudent.curso} · Pab. ${actualStudent.pabellon}` : ''}
+            </p>
+            <dl>
+              <dt>Categoría</dt>
+              <dd style={{ fontWeight: 700 }}>{actual.categoria}</dd>
+              <dt>Hora</dt>
+              <dd style={{ fontWeight: 700 }}>{actual.timestamp?.toDate ? fmtDateTime(actual.timestamp.toDate()) : ''}</dd>
+              <dt>Puntos</dt>
+              <dd>{actual.puntos > 0 ? `-${actual.puntos}` : '0'}</dd>
+              <dt>Descripción</dt>
+              <dd>{actual.descripcion || '—'}</dd>
+              <dt>Preceptor</dt>
+              <dd>{actual.preceptor || '—'}</dd>
+            </dl>
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={closeNovedades}>
+                Cerrar
+              </button>
+              {novedadIndex < novedades.length - 1 ? (
+                <button className="btn btn-primary" onClick={() => setNovedadIndex((i) => i + 1)}>
+                  Siguiente
+                </button>
+              ) : (
+                <button className="btn btn-primary" onClick={goToScoring}>
+                  Ir a Scoring
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
