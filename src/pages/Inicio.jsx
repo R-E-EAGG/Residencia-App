@@ -21,7 +21,10 @@ export default function Inicio() {
   const [showNovedades, setShowNovedades] = useState(false);
 
   useEffect(() => listenStudents(setStudents, () => {}), []);
-  useEffect(() => listenScoringToday(setNovedades, () => {}), []);
+  useEffect(
+    () => listenScoringToday(setNovedades, (err) => console.error('Error novedades scoring:', err)),
+    []
+  );
 
   const dniToStudent = useMemo(() => {
     const map = {};
