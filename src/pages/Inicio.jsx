@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { usePreceptor } from '../context/PreceptorContext';
-import { listenStudents, listenScoringToday } from '../lib/data';
+import { listenStudents, listenNovedadesHoy } from '../lib/data';
 import { fmtDateTime } from '../lib/dates';
 
 function todayLong() {
@@ -22,15 +22,9 @@ export default function Inicio() {
 
   useEffect(() => listenStudents(setStudents, () => {}), []);
   useEffect(
-    () => listenScoringToday(setNovedades, (err) => console.error('Error novedades scoring:', err)),
+    () => listenNovedadesHoy(setNovedades, (err) => console.error('Error novedades scoring:', err)),
     []
   );
-
-  const dniToStudent = useMemo(() => {
-    const map = {};
-    (students || []).forEach((s) => (map[s.dni] = s));
-    return map;
-  }, [students]);
 
   const hasNovedad = novedades.length > 0;
 
@@ -52,7 +46,7 @@ export default function Inicio() {
   }
 
   const actual = novedades[novedadIndex];
-  const actualStudent = actual ? dniToStudent[actual.dni] : null;
+  const actualStudent = actual ? (students || []).find((s) => s.dni === actual.dni) : null;
 
   return (
     <>
@@ -117,7 +111,7 @@ export default function Inicio() {
           <div className="modal">
             <h3>Novedad de scoring {novedades.length > 1 ? `(${novedadIndex + 1} de ${novedades.length})` : ''}</h3>
             <p className="modal-score">
-              {actualStudent ? actualStudent.nombreCompleto : actual.dni}
+              {actualStudent ? actualStudent.nombreCompleto : actual.nombreCompleto}
               {actualStudent ? ` · ${actualStudent.curso} · Pab. ${actualStudent.pabellon}` : ''}
             </p>
             <dl>

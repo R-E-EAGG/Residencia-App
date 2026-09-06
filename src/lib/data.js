@@ -227,22 +227,35 @@ export async function getScoringForMonth(monthKey) {
 }
 
 // Escucha en vivo las novedades de scoring cargadas HOY (cualquier alumno), para
-// el aviso pulsante en la portada de Inicio.
-export function listenScoringToday(onData, onError) {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  const q = query(
-    collectionGroup(db, 'historial'),
-    where('timestamp', '>=', Timestamp.fromDate(start)),
-    where('timestamp', '<', Timestamp.fromDate(end)),
-    orderBy('timestamp', 'asc')
-  );
+// el aviso en la portada de Inicio. Usa un unico documento resumen en vez de una
+// consulta de "Collection group", asi no depende de ningun indice especial de Firestore.
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+export function listenNovedadesHoy(onData, onError) {
   return onSnapshot(
-    q,
-    (snap) => onData(snap.docs.map((d) => ({ id: d.id, dni: d.ref.parent.parent.id, ...d.data() }))),
+    doc(db, 'app_state', 'novedadesHoy'),
+    (snap) => {
+      if (!snap.exists()) return onData([]);
+      const data = snap.data();
+      if (data.fecha !== todayKey()) return onData([]);
+      onData(data.items || []);
+    },
     onError
   );
+}
+
+async function registrarNovedadHoy(item) {
+  const ref = doc(db, 'app_state', 'novedadesHoy');
+  const snap = await getDoc(ref);
+  const key = todayKey();
+  if (snap.exists() && snap.data().fecha === key) {
+    await setDoc(ref, { fecha: key, items: arrayUnion(item) }, { merge: true });
+  } else {
+    await setDoc(ref, { fecha: key, items: [item] });
+  }
 }
 
 export async function addScoringEntry(dni, nombreCompleto, category, points, description, preceptor) {
@@ -263,6 +276,18 @@ export async function addScoringEntry(dni, nombreCompleto, category, points, des
     descripcion: description || '',
     preceptor: preceptor || '',
     timestamp: serverTimestamp(),
+  });
+
+  const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  await registrarNovedadHoy({
+    dni,
+    nombreCompleto,
+    categoria: category,
+    puntos: pts,
+    descripcion: description || '',
+    preceptor: preceptor || '',
+    hora,
+    timestamp: Timestamp.now(),
   });
 
   return newScore;
