@@ -32,6 +32,15 @@ export function phoneDigits(text) {
   return (text || '').replace(/\D/g, '');
 }
 
+// Arma el numero en formato internacional para WhatsApp (Argentina: 549 + numero).
+// Si ya viene con 54 o 549 adelante, lo respeta tal cual.
+export function toWhatsAppPhone(digits) {
+  if (!digits) return '';
+  if (digits.startsWith('549')) return digits;
+  if (digits.startsWith('54')) return '549' + digits.slice(2);
+  return '549' + digits;
+}
+
 // Formatea fecha + hora sin segundos (dd/mm/aaaa hh:mm). toLocaleString('es-AR')
 // sin opciones incluye segundos por defecto, por eso este helper centraliza el formato.
 export function fmtDateTime(date) {

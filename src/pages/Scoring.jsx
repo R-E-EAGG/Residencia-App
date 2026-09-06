@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { listenStudents, listenScoring, listenScoringHistorial, addScoringEntry, SCORE_START } from '../lib/data';
-import { fmtDateTime } from '../lib/dates';
+import { fmtDateTime, phoneDigits, toWhatsAppPhone } from '../lib/dates';
 import { usePreceptor } from '../context/PreceptorContext';
 
 const FILTERS = ['Todos', 'A', 'B', 'C'];
@@ -123,6 +123,7 @@ function ScoreModal({ student, info, onClose }) {
   const [points, setPoints] = useState('');
   const [desc, setDesc] = useState('');
   const [saving, setSaving] = useState(false);
+  const [avisarTutor, setAvisarTutor] = useState(false);
 
   useEffect(
     () => listenScoringHistorial(student.dni, setHistorial, (e) => alert('Error: ' + e.message)),
@@ -134,7 +135,31 @@ function ScoreModal({ student, info, onClose }) {
   async function handleSave() {
     setSaving(true);
     try {
-      await addScoringEntry(student.dni, student.nombreCompleto, cat, cat === 'ADVERTENCIA' ? 0 : Number(points), desc.trim(), preceptor);
+      const nuevoScore = await addScoringEntry(
+        student.dni,
+        student.nombreCompleto,
+        cat,
+        cat === 'ADVERTENCIA' ? 0 : Number(points),
+        desc.trim(),
+        preceptor
+      );
+
+      if (avisarTutor) {
+        const numero = toWhatsAppPhone(phoneDigits(student.telefonoTutor));
+        if (!numero) {
+          alert('Este alumno no tiene teléfono de tutor cargado, no se pudo abrir WhatsApp.');
+        } else {
+          const pts = cat === 'ADVERTENCIA' ? 0 : Number(points);
+          const motivo = desc.trim() ? ` por "${desc.trim()}"` : '';
+          const cuerpo =
+            cat === 'ADVERTENCIA'
+              ? `recibió una advertencia${motivo}`
+              : `recibió una falta ${cat.toLowerCase()}${motivo}. Se descuentan ${pts} punto(s) del sistema de scoring`;
+          const mensaje = `Residencia Estudiantil EAGG informa: el alumno ${student.nombreCompleto} ${cuerpo}. Puntaje actual: ${nuevoScore}/${SCORE_START}.`;
+          window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`, '_blank');
+        }
+      }
+
       onClose();
     } catch (err) {
       alert('Error: ' + err.message);
@@ -197,6 +222,16 @@ function ScoreModal({ student, info, onClose }) {
 
         <div className="field-label">Descripción</div>
         <textarea rows={3} placeholder="Ej: no respeta horario de descanso" value={desc} onChange={(e) => setDesc(e.target.value)} />
+
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 14, fontSize: 13, cursor: 'pointer' }}>
+          <input type="checkbox" checked={avisarTutor} onChange={(e) => setAvisarTutor(e.target.checked)} style={{ marginTop: 3 }} />
+          <span>
+            Compartir con el tutor por WhatsApp
+            <div style={{ fontSize: 11, color: 'var(--muted-text)', fontWeight: 400 }}>
+              Al guardar se abre WhatsApp con el mensaje ya escrito, para que lo revises y lo envíes vos.
+            </div>
+          </span>
+        </label>
 
         <div className="modal-actions">
           <button className="btn btn-outline" onClick={onClose}>
