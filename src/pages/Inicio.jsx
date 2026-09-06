@@ -5,6 +5,7 @@ import { auth } from '../firebase';
 import { usePreceptor } from '../context/PreceptorContext';
 import { listenStudents, listenNovedadesHoy } from '../lib/data';
 import { fmtDateTime } from '../lib/dates';
+import { getNovedadesVistasHasta, setNovedadesVistasHasta } from '../lib/auth';
 
 function todayLong() {
   const d = new Date();
@@ -17,8 +18,10 @@ export default function Inicio() {
   const navigate = useNavigate();
   const [students, setStudents] = useState(null);
   const [novedades, setNovedades] = useState([]);
+  const [novedadesParaMostrar, setNovedadesParaMostrar] = useState([]);
   const [novedadIndex, setNovedadIndex] = useState(0);
   const [showNovedades, setShowNovedades] = useState(false);
+  const [vistasHasta, setVistasHasta] = useState(() => getNovedadesVistasHasta());
 
   useEffect(() => listenStudents(setStudents, () => {}), []);
   useEffect(
@@ -26,13 +29,25 @@ export default function Inicio() {
     []
   );
 
-  const hasNovedad = novedades.length > 0;
+  const novedadesNoVistas = useMemo(
+    () => novedades.filter((n) => (n.timestamp?.toMillis ? n.timestamp.toMillis() : 0) > vistasHasta),
+    [novedades, vistasHasta]
+  );
+
+  const hasNovedad = novedadesNoVistas.length > 0;
 
   function openScoring(e) {
     if (hasNovedad) {
       e.preventDefault();
+      setNovedadesParaMostrar(novedadesNoVistas);
       setNovedadIndex(0);
       setShowNovedades(true);
+      const maxMillis = novedades.reduce(
+        (max, n) => Math.max(max, n.timestamp?.toMillis ? n.timestamp.toMillis() : 0),
+        0
+      );
+      setNovedadesVistasHasta(maxMillis);
+      setVistasHasta(maxMillis);
     }
   }
 
@@ -45,7 +60,7 @@ export default function Inicio() {
     navigate('/scoring');
   }
 
-  const actual = novedades[novedadIndex];
+  const actual = novedadesParaMostrar[novedadIndex];
   const actualStudent = actual ? (students || []).find((s) => s.dni === actual.dni) : null;
 
   return (
@@ -71,7 +86,7 @@ export default function Inicio() {
           </div>
           <div className="home-tile-title">Scoring</div>
           <div className="home-tile-desc">
-            {hasNovedad ? `${novedades.length} novedad(es) hoy` : 'Puntaje y novedades'}
+            {hasNovedad ? `${novedadesNoVistas.length} novedad(es) sin ver` : 'Puntaje y novedades'}
           </div>
         </Link>
 
@@ -109,7 +124,7 @@ export default function Inicio() {
       {showNovedades && actual && (
         <div className="modal-overlay">
           <div className="modal">
-            <h3>Novedad de scoring {novedades.length > 1 ? `(${novedadIndex + 1} de ${novedades.length})` : ''}</h3>
+            <h3>Novedad de scoring {novedadesParaMostrar.length > 1 ? `(${novedadIndex + 1} de ${novedadesParaMostrar.length})` : ''}</h3>
             <p className="modal-score">
               {actualStudent ? actualStudent.nombreCompleto : actual.nombreCompleto}
               {actualStudent ? ` · ${actualStudent.curso} · Pab. ${actualStudent.pabellon}` : ''}
@@ -130,7 +145,7 @@ export default function Inicio() {
               <button className="btn btn-outline" onClick={closeNovedades}>
                 Cerrar
               </button>
-              {novedadIndex < novedades.length - 1 ? (
+              {novedadIndex < novedadesParaMostrar.length - 1 ? (
                 <button className="btn btn-primary" onClick={() => setNovedadIndex((i) => i + 1)}>
                   Siguiente
                 </button>

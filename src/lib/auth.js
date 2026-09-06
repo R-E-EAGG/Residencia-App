@@ -48,3 +48,13 @@ export async function checkResetCode(oobCode) {
 export async function confirmNewPin(oobCode, newPin) {
   await confirmPasswordReset(auth, oobCode, pinToPassword(newPin));
 }
+
+// "Hasta cuando" este celular ya vio las novedades de scoring (independiente por
+// dispositivo/preceptor, no se comparte entre celulares).
+const NOVEDADES_VISTAS_KEY = 'residencia_novedades_vistas_hasta';
+export function getNovedadesVistasHasta() {
+  return Number(localStorage.getItem(NOVEDADES_VISTAS_KEY) || 0);
+}
+export function setNovedadesVistasHasta(millis) {
+  localStorage.setItem(NOVEDADES_VISTAS_KEY, String(millis));
+}
