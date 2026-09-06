@@ -3,7 +3,7 @@ import { listenStudents, appendEvento, clearAttendanceDay, listenAttendanceForDa
 import { todayStr, isWithinWindow, lastEventKind, eventosToText, phoneDigits, fmtDateTime } from '../lib/dates';
 import { usePreceptor } from '../context/PreceptorContext';
 
-const FILTERS = ['Todos', 'A', 'B', 'C'];
+const FILTERS = ['Todos', 'A', 'B', 'C', 'CURSO'];
 
 export default function Asistencia() {
   const { nombre: preceptor } = usePreceptor();
@@ -15,7 +15,9 @@ export default function Asistencia() {
   const [infoStudent, setInfoStudent] = useState(null);
   const [obsCtx, setObsCtx] = useState(null);
   const [obsText, setObsText] = useState('');
-  const [listKind, setListKind] = useState(null); // 'P' | 'AUSENTE' | 'RETIRO' | 'REGRESO'
+  const [listKind, setListKind] = useState(null);
+  const [showCursoPicker, setShowCursoPicker] = useState(false);
+  const [selectedCurso, setSelectedCurso] = useState(null); // 'P' | 'AUSENTE' | 'RETIRO' | 'REGRESO'
 
   useEffect(() => {
     const unsub = listenStudents(setStudents, (err) => alert('Error: ' + err.message));
@@ -37,8 +39,18 @@ export default function Asistencia() {
   }, [students]);
 
   const visible = useMemo(
-    () => (filter === 'Todos' ? sorted : sorted.filter((s) => s.pabellon === filter)),
+    () => (filter === 'Todos' || filter === 'CURSO' ? sorted : sorted.filter((s) => s.pabellon === filter)),
     [sorted, filter]
+  );
+
+  const cursosUnicos = useMemo(() => {
+    const set = new Set(sorted.map((s) => s.curso).filter(Boolean));
+    return [...set].sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+  }, [sorted]);
+
+  const alumnosDelCurso = useMemo(
+    () => (selectedCurso ? sorted.filter((s) => s.curso === selectedCurso) : []),
+    [sorted, selectedCurso]
   );
 
   const counts = useMemo(() => {
@@ -66,6 +78,14 @@ export default function Asistencia() {
     });
     return lists;
   }, [visible, attendance]);
+
+  function handleFabClick() {
+    const next = FILTERS[(FILTERS.indexOf(filter) + 1) % FILTERS.length];
+    setFilter(next);
+    if (next === 'CURSO') {
+      setShowCursoPicker(true);
+    }
+  }
 
   function setPendingFor(dni, val) {
     setPending((p) => {
@@ -125,8 +145,8 @@ export default function Asistencia() {
   return (
     <>
       <Header date={date} setDate={setDate} filter={filter} counts={counts} enabled={enabled} isToday={isToday} onOpenList={setListKind} />
-      <button className="fab" onClick={() => setFilter(FILTERS[(FILTERS.indexOf(filter) + 1) % FILTERS.length])}>
-        {filter === 'Todos' ? 'Todos' : `Pab. ${filter}`}
+      <button className="fab" onClick={handleFabClick}>
+        {filter === 'Todos' ? 'Todos' : filter === 'CURSO' ? 'Por Curso' : `Pab. ${filter}`}
       </button>
       <main className="app-main">
         <ul className="list">
@@ -231,6 +251,102 @@ export default function Asistencia() {
             )}
             <div className="modal-actions">
               <button className="btn btn-outline" onClick={() => setListKind(null)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showCursoPicker && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Elegí un curso</h3>
+            <p className="hint">Se abre la asistencia de ese curso, separada de la lista general.</p>
+            {cursosUnicos.length === 0 ? (
+              <p className="hist-empty" style={{ padding: '8px 0' }}>No hay cursos cargados todavía.</p>
+            ) : (
+              <ul className="list">
+                {cursosUnicos.map((curso) => (
+                  <li
+                    key={curso}
+                    className="row"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      setSelectedCurso(curso);
+                      setShowCursoPicker(false);
+                    }}
+                  >
+                    <div className="row-info" style={{ cursor: 'default' }}>
+                      <div className="row-name">{curso}</div>
+                      <div className="row-sub">{sorted.filter((s) => s.curso === curso).length} alumno(s)</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={() => setShowCursoPicker(false)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedCurso && (
+        <div className="modal-overlay">
+          <div className="modal modal-lg">
+            <h3>{selectedCurso}</h3>
+            <p className="hint">Asistencia de este curso — se guarda igual que en la lista general.</p>
+            <ul className="list">
+              {alumnosDelCurso.map((s) => {
+                const eventos = attendance[s.dni]?.eventos;
+                const kind = lastEventKind(eventos);
+                const text = eventosToText(eventos);
+                const isPending = !!pending[s.dni];
+                return (
+                  <li key={s.dni} className={`row${kind ? ' st-' + kind : ''}`}>
+                    <button className="row-info" onClick={() => setInfoStudent(s)}>
+                      <div className="row-name">{s.nombreCompleto}</div>
+                      <div className="row-sub">Pab. {s.pabellon}</div>
+                    </button>
+                    <div className="row-actions">
+                      {isPending && <span className="spinner" />}
+                      <button
+                        className={`status-btn${kind === 'AUSENTE' ? ' active-A' : ''}`}
+                        disabled={!enabled || isPending}
+                        onClick={() => doAppendEvent(s.dni, 'AUSENTE')}
+                      >
+                        A
+                      </button>
+                      <button
+                        className={`status-btn${kind === 'RETIRO' ? ' active-R' : ''}`}
+                        disabled={!enabled || isPending}
+                        onClick={() => openObs(s, 'RETIRO')}
+                      >
+                        R
+                      </button>
+                      <button
+                        className={`status-btn${kind === 'REGRESO' ? ' active-I' : ''}`}
+                        disabled={!enabled || isPending}
+                        onClick={() => openObs(s, 'REGRESO')}
+                      >
+                        I
+                      </button>
+                      <button
+                        className="eraser-btn"
+                        disabled={!text || !enabled || isPending}
+                        onClick={() => doClear(s.dni)}
+                      >
+                        ⌫
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={() => setSelectedCurso(null)}>
                 Cerrar
               </button>
             </div>
